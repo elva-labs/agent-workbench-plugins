@@ -8,3 +8,13 @@ version = "0.1.0"
 run = ["node", "dist/main.js"]
 tools = ["list", "add", "finish"]
 sections = ["Todos", "Notes"]
+
+[[plugin]]
+name = "git"
+path = "plugins/git"
+description = "The branch, what changed, the stashes and a graph of the log."
+version = "0.1.0"
+run = ["node", "dist/main.js"]
+tools = ["status", "commit", "log"]
+sections = ["Git", "Branches"]
+view = "full"
