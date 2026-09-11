@@ -375,6 +375,72 @@ it("sends the lines the open, diff, present and notify helpers stand for", async
   await running;
 });
 
+it("greets with the room its view asks for", async () => {
+  const { input, output, line } = streams();
+  const p = plugin({ name: "git", version: "0.1.0", view: "full" });
+  const running = p.run({ input, output });
+
+  expect((await line(0)).view).toEqual({ width: "full" });
+  input.end();
+  await running;
+});
+
+it("sends the lines the view and viewData helpers stand for", async () => {
+  const { input, output, line } = streams();
+  const p = plugin({ name: "git", version: "0.1.0", view: "full" });
+  const running = p.run({ input, output });
+  await line(0);
+
+  p.view("/srv/orbit-api", { html: "<h1>Graph</h1>" });
+  p.view("/srv/orbit-api", { path: "page.html", open: true });
+  p.viewData("/srv/orbit-api", { commit: "1a2b3c" });
+
+  expect(await line(1)).toEqual({
+    type: "view",
+    project: "/srv/orbit-api",
+    html: "<h1>Graph</h1>",
+  });
+  expect(await line(2)).toEqual({
+    type: "view",
+    project: "/srv/orbit-api",
+    path: "page.html",
+    open: true,
+  });
+  expect(await line(3)).toEqual({
+    type: "view_data",
+    project: "/srv/orbit-api",
+    data: { commit: "1a2b3c" },
+  });
+  input.end();
+  await running;
+});
+
+it("hands what the page sent to the view_message listener", async () => {
+  const { input, output, line, send } = streams();
+  const heard: unknown[] = [];
+  const p = plugin({ name: "git", version: "0.1.0", view: "full" });
+  p.on("view_message", (event) => {
+    heard.push([event.project, event.payload]);
+    p.viewData(event.project, { got: event.payload });
+  });
+  const running = p.run({ input, output });
+  await line(0);
+
+  send({
+    type: "view_message",
+    project: "/srv/orbit-api",
+    payload: { commit: "1a2b3c" },
+  });
+  expect(await line(1)).toEqual({
+    type: "view_data",
+    project: "/srv/orbit-api",
+    data: { got: { commit: "1a2b3c" } },
+  });
+  expect(heard).toEqual([["/srv/orbit-api", { commit: "1a2b3c" }]]);
+  input.end();
+  await running;
+});
+
 it("ends the loop when it is told to stop", async () => {
   const { input, output, line, send } = streams();
   const stopped: string[] = [];
@@ -423,4 +489,14 @@ it("refuses a name that is not a plain identifier", () => {
     /lowercase/,
   );
   expect(() => plugin({ name: "", version: "0.2.0" })).toThrow(/lowercase/);
+});
+
+it("refuses a view that is neither wide nor full", () => {
+  expect(() =>
+    plugin({
+      name: "git",
+      version: "0.1.0",
+      view: "huge" as "wide",
+    }),
+  ).toThrow(/wide or full/);
 });

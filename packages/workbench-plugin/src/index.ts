@@ -18,6 +18,7 @@ export type {
   Choice,
   DeclaredSection,
   DeclaredTool,
+  DeclaredView,
   DiffLine,
   DiffOptions,
   Field,
@@ -38,4 +39,8 @@ export type {
   StopEvent,
   ToolCall,
   TreeEvent,
+  ViewDataLine,
+  ViewLine,
+  ViewMessageEvent,
+  ViewOptions,
 } from "./types.js";

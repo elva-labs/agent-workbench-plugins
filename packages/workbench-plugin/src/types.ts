@@ -96,6 +96,13 @@ export interface StopEvent {
   type: "stop";
 }
 
+/** Something the plugin's page sent, for the project it is open on. */
+export interface ViewMessageEvent {
+  type: "view_message";
+  project: string;
+  payload: unknown;
+}
+
 /** Everything that arrives on standard input. */
 export type AppMessage =
   | HelloEvent
@@ -103,6 +110,7 @@ export type AppMessage =
   | SessionEvent
   | TreeEvent
   | StopEvent
+  | ViewMessageEvent
   | ({ type: "tool" } & ToolCall)
   | ({ type: "action" } & ActionCall);
 
@@ -120,6 +128,13 @@ export interface DeclaredSection {
   actions: Action[];
 }
 
+/** The view as the greeting declares it: the room the page asks for, the
+    same word the manifest says. */
+export interface DeclaredView {
+  /** "wide" is the viewer beside the tree, "full" the whole pane. */
+  width: "wide" | "full";
+}
+
 /** The plugin's greeting: its name, its version and what it offers. */
 export interface Greeting {
   type: "hello";
@@ -127,7 +142,7 @@ export interface Greeting {
   version: string;
   tools: DeclaredTool[];
   sections: DeclaredSection[];
-  view: null;
+  view: DeclaredView | null;
 }
 
 /** The answer to a tool call or an action, under the same id. */
@@ -182,6 +197,25 @@ export interface NotifyLine {
   session?: string;
 }
 
+/** The plugin's page for one project, written out or read from a file of
+    the plugin's own directory. */
+export interface ViewLine {
+  type: "view";
+  project: string;
+  html?: string;
+  path?: string;
+  /** Whether the app shows the page now. */
+  open?: boolean;
+}
+
+/** A message for the page the plugin has for a project, which reaches it
+    while it is open and is kept nowhere. */
+export interface ViewDataLine {
+  type: "view_data";
+  project: string;
+  data: unknown;
+}
+
 /** Everything the plugin writes to standard output. */
 export type PluginMessage =
   | Greeting
@@ -190,7 +224,9 @@ export type PluginMessage =
   | OpenLine
   | DiffLine
   | PresentLine
-  | NotifyLine;
+  | NotifyLine
+  | ViewLine
+  | ViewDataLine;
 
 /** Where to open, as the `open` helper takes it. */
 export interface OpenOptions {
@@ -210,4 +246,12 @@ export interface DiffOptions {
 export interface PresentOptions {
   files: string[];
   caption?: string;
+}
+
+/** The page to send, as the `view` helper takes it: the html itself, or a
+    file of the plugin's own directory to read it from. */
+export interface ViewOptions {
+  html?: string;
+  path?: string;
+  open?: boolean;
 }

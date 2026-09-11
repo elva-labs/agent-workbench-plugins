@@ -63,11 +63,18 @@ p.run();
   actions does. The handler is given the row it was taken on and the input
   the app asked for, and the section is sent again once it is done.
 - `on(event, handler)` listens for a project opening or closing, a session
-  starting, changing state or ending, a tree that moved, or the request to
-  stop.
+  starting, changing state or ending, a tree that moved, a message from the
+  plugin's page, or the request to stop.
 - `open`, `diff`, `present` and `notify` show a place in the viewer, a
   file's diff, media, or a line on a session's row, the same means the
   agent has.
+- `view(project, { html, path, open })` sends the plugin's page for a
+  project, written out or read from a file of the plugin's own directory,
+  and `viewData(project, data)` sends that page a message while it is open.
+  What the page sends back arrives at `on("view_message", handler)`. A
+  plugin with a page says how much room it asks for when it is made,
+  `plugin({ name, version, view: "full" })`, the same word its manifest
+  says.
 - `run()` reads standard input and writes standard output, and resolves
   when the app asks the plugin to stop or the input ends. Calls are handled
   as they arrive, a handler that fails answers with its error and nothing
