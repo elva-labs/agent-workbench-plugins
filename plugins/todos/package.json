@@ -1,0 +1,23 @@
+{
+  "name": "@elva-labs/workbench-plugin-todos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The TODOs in the code, and notes to self, per project.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@elva-labs/workbench-plugin": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^5.0.0"
+  }
+}

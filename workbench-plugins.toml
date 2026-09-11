@@ -1,0 +1,10 @@
+# The plugins in this source, as the app reads them.
+
+[[plugin]]
+name = "todos"
+path = "plugins/todos"
+description = "The TODOs in the code, and notes to self, per project."
+version = "0.1.0"
+run = ["node", "dist/main.js"]
+tools = ["list", "add", "finish"]
+sections = ["Todos", "Notes"]
