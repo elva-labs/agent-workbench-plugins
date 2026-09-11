@@ -160,6 +160,10 @@ p.action("branches", "new", async ({ input, project }) => {
   await p.refresh("status", project);
 });
 
+/** The page each project was last sent, so one that has not changed is
+    not sent again: the page the user is reading stays where it was. */
+const sent = new Map<string, string>();
+
 /** The page for a project, as the graph stands now. A project whose log
     cannot be read has no page to show. */
 async function send(project: string): Promise<void> {
@@ -168,7 +172,10 @@ async function send(project: string): Promise<void> {
       readOnce(project),
       graph(project),
     ]);
-    p.view(project, { html: page(name(held.head), entries) });
+    const html = page(name(held.head), entries);
+    if (sent.get(project) === html) return;
+    sent.set(project, html);
+    p.view(project, { html });
   } catch {
     // A directory that is no repository of git's has nothing to draw.
   }
@@ -212,6 +219,7 @@ p.on("tree", ({ project }) => {
 
 p.on("project", ({ event, path }) => {
   if (event === "opened") return;
+  sent.delete(path);
   const waiting = settling.get(path);
   if (waiting === undefined) return;
   clearTimeout(waiting);
