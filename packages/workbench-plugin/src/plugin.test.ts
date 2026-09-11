@@ -59,7 +59,10 @@ it("greets with its tools and its sections before anything else", async () => {
     "checks",
     {
       description: "The branch's checks.",
-      inputSchema: { type: "object", properties: { state: { type: "string" } } },
+      inputSchema: {
+        type: "object",
+        properties: { state: { type: "string" } },
+      },
     },
     () => "",
   );
@@ -297,7 +300,12 @@ it("sends the lines the open, diff, present and notify helpers stand for", async
   const running = p.run({ input, output });
   await line(0);
 
-  p.open("/srv/orbit-api", { path: "src/main.rs", from: 3, to: 5, note: "here" });
+  p.open("/srv/orbit-api", {
+    path: "src/main.rs",
+    from: 3,
+    to: 5,
+    note: "here",
+  });
   p.diff("/srv/orbit-api", { path: "src/main.rs" });
   p.present("/srv/orbit-api", { files: ["shot.png"], caption: "The graph" });
   p.notify("/srv/orbit-api", "needs a key", "6f2a");

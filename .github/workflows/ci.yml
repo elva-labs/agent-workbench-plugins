@@ -1,0 +1,32 @@
+name: CI
+
+# Every push and pull request: the types, the format, the tests and the
+# build of every workspace, and the manifest read the way the app reads it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      # A plugin's own directory must hold what its manifest says it does,
+      # and every plugin must start, greet and stop.
+      - run: npm run check:plugins
