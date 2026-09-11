@@ -260,6 +260,42 @@ it("answers an action that threw with the error it threw", async () => {
   await running;
 });
 
+it("asks a header that is a function what it holds, each time the rows go", async () => {
+  const { input, output, line, send } = streams();
+  let done = false;
+  const p = plugin({ name: "github", version: "0.2.0" });
+  p.section("pull-request", {
+    title: "Pull request",
+    actions: ({ project }) =>
+      done
+        ? [{ id: "clear", label: `Clear ${project}` }]
+        : [{ id: "refresh", label: "Refresh" }],
+    rows: () => [],
+  });
+  const running = p.run({ input, output });
+  // The greeting asks it too, with no project to speak of.
+  const greeting = await line(0);
+  expect(greeting.sections).toEqual([
+    {
+      id: "pull-request",
+      title: "Pull request",
+      actions: [{ id: "refresh", label: "Refresh" }],
+    },
+  ]);
+
+  await p.refresh("pull-request", "/srv/orbit-api");
+  expect((await line(1)).actions).toEqual([
+    { id: "refresh", label: "Refresh" },
+  ]);
+  done = true;
+  await p.refresh("pull-request", "/srv/orbit-api");
+  expect((await line(2)).actions).toEqual([
+    { id: "clear", label: "Clear /srv/orbit-api" },
+  ]);
+  input.end();
+  await running;
+});
+
 it("sends every section when a project opens, and forgets it when it closes", async () => {
   const { input, output, line, send, all } = streams();
   const opened: string[] = [];
