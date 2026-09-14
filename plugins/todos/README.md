@@ -1,10 +1,10 @@
 # todos
 
 What the code says it still owes, and what you want to remember about a
-project yourself. Two sections under the file tree and three tools for the
+project yourself. One fold under the file tree and three tools for the
 agent.
 
-## Sections
+## The fold
 
 **Todos** is read from the project. Every TODO and FIXME comment is a row:
 what the marker says, the file and the line under it, and Enter opens the
@@ -15,10 +15,10 @@ is read, and otherwise the directory without `node_modules`, `dist`,
 files that are not text are left alone, and a scan stops at 500 hits and
 says so on a last row.
 
-**Notes** is kept by hand and the code knows nothing about it. Add a note
-from the section's header, mark one done or take it away from its row, and
-clear the ones that are done. The rows are the notes that are not done,
-newest first, with how long ago each was written.
+**Notes** is a group inside the fold, kept by hand, and the code knows
+nothing about it. Add a note from the group's line, mark one done or take
+it away from its row, and clear the ones that are done. The rows are the
+notes that are not done, newest first, with how long ago each was written.
 
 ## Tools
 

@@ -1,6 +1,7 @@
 /**
  * The todos plugin: what the code says and what its user wants to
- * remember, as two sections under the tree and three tools for the agent.
+ * remember, as the Todos section and the Notes group under the tree and
+ * three tools for the agent.
  */
 
 import { plugin, type Action } from "@elva-labs/workbench-plugin";

@@ -296,6 +296,66 @@ it("asks a header that is a function what it holds, each time the rows go", asyn
   await running;
 });
 
+it("sends the detail a section says beside its title", async () => {
+  const { input, output, line } = streams();
+  let said: string | null = "main, 2 ahead";
+  const p = plugin({ name: "git", version: "0.1.0" });
+  p.section("status", {
+    title: "Git",
+    detail: () => {
+      if (said === null) throw new Error("git is not there");
+      return said;
+    },
+    rows: () => [check],
+  });
+  const running = p.run({ input, output });
+  await line(0);
+
+  await p.refresh("status", "/srv/orbit-api");
+  expect(await line(1)).toEqual({
+    type: "section",
+    id: "status",
+    title: "Git",
+    project: "/srv/orbit-api",
+    rows: [check],
+    actions: [],
+    detail: "main, 2 ahead",
+  });
+
+  // A detail that is nothing, and one that could not be found, are both
+  // a section with none, and the rows go all the same.
+  said = "";
+  await p.refresh("status", "/srv/orbit-api");
+  expect(await line(2)).not.toHaveProperty("detail");
+  said = null;
+  await p.refresh("status", "/srv/orbit-api");
+  const third = await line(3);
+  expect(third).not.toHaveProperty("detail");
+  expect(third.rows).toEqual([check]);
+  input.end();
+  await running;
+});
+
+it("greets with a section that starts folded, and says so when it sends it", async () => {
+  const { input, output, line } = streams();
+  const p = plugin({ name: "git", version: "0.1.0" });
+  p.section("status", { title: "Git", rows: () => [] });
+  p.section("branches", { title: "Branches", folded: true, rows: () => [] });
+  const running = p.run({ input, output });
+
+  expect((await line(0)).sections).toEqual([
+    { id: "status", title: "Git", actions: [] },
+    { id: "branches", title: "Branches", actions: [], folded: true },
+  ]);
+
+  await p.refresh("status", "/srv/orbit-api");
+  expect(await line(1)).not.toHaveProperty("folded");
+  await p.refresh("branches", "/srv/orbit-api");
+  expect((await line(2)).folded).toBe(true);
+  input.end();
+  await running;
+});
+
 it("sends every section when a project opens, and forgets it when it closes", async () => {
   const { input, output, line, send, all } = streams();
   const opened: string[] = [];

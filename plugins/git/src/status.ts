@@ -234,17 +234,24 @@ function word(letter: string): string {
   return WORDS.get(letter) ?? "changed";
 }
 
-/** Where the branch stands, as the first row says it. */
-export function standing(head: Head): string {
+/** How far the branch is from its upstream, in words, and what a branch
+    with no upstream to stand against says instead. */
+export function distance(head: Head): string {
   if (head.upstream === null) return "no upstream";
   const counts: string[] = [];
   if (head.ahead > 0) counts.push(`${head.ahead} ahead`);
   if (head.behind > 0) counts.push(`${head.behind} behind`);
-  if (counts.length === 0) counts.push("up to date");
-  return [head.upstream, ...counts].join(", ");
+  return counts.length === 0 ? "up to date" : counts.join(", ");
 }
 
-/** What the branch row calls the head. */
+/** Where the branch stands, with the upstream it stands against. */
+export function standing(head: Head): string {
+  if (head.upstream === null) return "no upstream";
+  return `${head.upstream}, ${distance(head)}`;
+}
+
+/** What the head is called: the branch it is on, or the commit it sits
+    at while it is detached. */
 export function name(head: Head): string {
   if (head.branch !== null) return head.branch;
   return head.head === "" ? "detached" : `detached at ${head.head}`;

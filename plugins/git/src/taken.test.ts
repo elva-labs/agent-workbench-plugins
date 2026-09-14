@@ -166,5 +166,5 @@ it("points at the file a row stands for, with what changed under it", async () =
     path: "a.txt",
     note: "modified",
   });
-  expect(taken.opened(await row("head"))).toBeNull();
+  expect(taken.opened(null)).toBeNull();
 });

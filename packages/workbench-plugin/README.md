@@ -55,10 +55,14 @@ p.run();
   agent can call. What the handler returns is the call's content, a string
   as it is and anything else as JSON. What it throws is the error the agent
   reads.
-- `section(id, { title, actions, rows })` registers a section under the
-  tree. The rows are computed for one project at a time, on every project
-  that is open when the app greets the plugin, on every project that opens
-  after that, and whenever `refresh(id, project)` is called.
+- `section(id, { title, actions, detail, folded, rows })` registers a
+  section under the tree. The rows are computed for one project at a time,
+  on every project that is open when the app greets the plugin, on every
+  project that opens after that, and whenever `refresh(id, project)` is
+  called. `detail` is asked alongside them for a short line beside the
+  section's title, and a detail that is empty or that could not be found is
+  a section with none. `folded: true` starts the section folded where the
+  app draws it as a group of its own.
 - `action(section, action, handler)` registers what one of a section's
   actions does. The handler is given the row it was taken on and the input
   the app asked for, and the section is sent again once it is done.

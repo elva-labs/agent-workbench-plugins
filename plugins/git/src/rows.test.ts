@@ -4,11 +4,13 @@ import { afterEach, beforeEach, expect, it } from "vitest";
 import type { Action, Row } from "@elva-labs/workbench-plugin";
 import { branches } from "./branches.js";
 import {
+  branchOf,
   BRANCH_ACTIONS,
   branchRows,
   fileOf,
   stashOf,
   STATUS_ACTIONS,
+  statusDetail,
   statusRows,
   sure,
 } from "./rows.js";
@@ -97,7 +99,7 @@ async function busy(): Promise<void> {
   await file(project, "new.txt", "three\n");
 }
 
-it("draws the branch, every changed file and every stash", async () => {
+it("draws every changed file and then every stash", async () => {
   await busy();
 
   const rows = statusRows(
@@ -109,7 +111,6 @@ it("draws the branch, every changed file and every stash", async () => {
   expect(
     rows.map((row) => [row.id, row.label, row.detail, row.state ?? null]),
   ).toEqual([
-    ["head", "main", "origin/main, 1 ahead", null],
     ["file:gone.txt", "gone.txt", "deleted", "waiting"],
     ["file:kept.txt", "kept.txt", "staged, modified", "ok"],
     ["file:new.txt", "new.txt", "untracked", "waiting"],
@@ -120,10 +121,9 @@ it("draws the branch, every changed file and every stash", async () => {
       null,
     ],
   ]);
-  expect(rows[0]!.default).toBe("push");
-  expect(rows[2]!.default).toBe("open");
-  expect(rows[4]!.default).toBeUndefined();
-  expect(rows[4]!.actions?.map((action) => action.id)).toEqual([
+  expect(rows[1]!.default).toBe("open");
+  expect(rows[3]!.default).toBeUndefined();
+  expect(rows[3]!.actions?.map((action) => action.id)).toEqual([
     "apply",
     "pop",
     "drop",
@@ -131,17 +131,28 @@ it("draws the branch, every changed file and every stash", async () => {
   sound(rows);
 });
 
-it("leaves the branch row without a default when there is nothing to push", async () => {
+it("draws nothing where a repository is clean", async () => {
   await commit(project, "a.txt", "one\n", "the first commit");
 
-  const rows = statusRows(await status(project), [], seconds());
+  expect(statusRows(await status(project), [], seconds())).toEqual([]);
+});
 
-  expect(rows[0]).toEqual({
-    id: "head",
-    label: "main",
-    detail: "no upstream",
-  });
-  sound(rows);
+it("says the branch and how far it stands from its upstream", async () => {
+  await commit(project, "a.txt", "one\n", "the first commit");
+
+  expect(statusDetail(await status(project))).toBe("main, no upstream");
+
+  const origin = await temporary("origin");
+  elsewhere.push(origin);
+  await run(origin, ["init", "--bare", "-q", "-b", "main", origin]);
+  await run(project, ["remote", "add", "origin", origin]);
+  await run(project, ["push", "-q", "-u", "origin", "main"]);
+
+  expect(statusDetail(await status(project))).toBe("main, up to date");
+
+  await commit(project, "b.txt", "two\n", "the second commit");
+
+  expect(statusDetail(await status(project))).toBe("main, 1 ahead");
 });
 
 it("offers what can be done to a file and nothing else", async () => {
@@ -224,13 +235,15 @@ it("holds what each header can do, fields and all", () => {
 });
 
 it("says what a row stands for, and nothing for a row of another kind", () => {
-  const head: Row = { id: "head", label: "main" };
   const one: Row = { id: "file:src/main.ts", label: "src/main.ts" };
   const put: Row = { id: "stash:stash@{2}", label: "stash@{2}: on main" };
+  const branch: Row = { id: "branch:topic", label: "topic" };
 
   expect(fileOf(one)).toBe("src/main.ts");
-  expect(fileOf(head)).toBeNull();
+  expect(fileOf(branch)).toBeNull();
   expect(fileOf(null)).toBeNull();
   expect(stashOf(put)).toBe("stash@{2}");
   expect(stashOf(one)).toBeNull();
+  expect(branchOf(branch)).toBe("topic");
+  expect(branchOf(put)).toBeNull();
 });

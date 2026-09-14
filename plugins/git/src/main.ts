@@ -1,7 +1,8 @@
 /**
- * The git plugin: what the repository holds, as two sections under the
- * tree, a page of the log in the changes pane, and three tools for the
- * agent. Everything it knows it asks `git` in the project for.
+ * The git plugin: what the repository holds, as the Git section and the
+ * Branches group under the tree, a page of the log in the changes pane,
+ * and three tools for the agent. Everything it knows it asks `git` in the
+ * project for.
  */
 
 import { plugin } from "@elva-labs/workbench-plugin";
@@ -12,6 +13,7 @@ import {
   BRANCH_ACTIONS,
   branchRows,
   STATUS_ACTIONS,
+  statusDetail,
   statusRows,
 } from "./rows.js";
 import { name, status, type Status } from "./status.js";
@@ -92,6 +94,7 @@ p.tool(
 p.section("status", {
   title: "Git",
   actions: STATUS_ACTIONS,
+  detail: async ({ project }) => statusDetail(await readOnce(project)),
   rows: async ({ project }) => {
     const [held, put] = await Promise.all([
       readOnce(project),
@@ -106,6 +109,9 @@ p.section("status", {
 p.section("branches", {
   title: "Branches",
   actions: BRANCH_ACTIONS,
+  // A repository holds branches enough that the group is left closed
+  // until it is asked for.
+  folded: true,
   rows: async ({ project }) => branchRows(await branches(project)),
 });
 

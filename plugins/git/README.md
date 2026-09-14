@@ -2,26 +2,26 @@
 
 What the repository under a project holds: the branch and where it stands,
 every file that has changed, the stashes, the branches, and a graph of the
-log. Two sections under the file tree, a page in the changes pane, and
-three tools for the agent.
+log. One fold under the file tree, a page in the changes pane, and three
+tools for the agent.
 
-## Sections
+## The fold
 
-**Git** is the branch first, with its upstream and how far ahead or behind
-it is, and Enter pushes while there is something to push. Then a row per
-changed file: the path, what happened to it in words, and a dot that is ok
-for what is staged whole, waiting for what is not, and failed for a file
-both sides of a merge have touched. Enter opens that file's diff in the
-viewer, and its row stages it, takes it back out of the index, or throws
-the change away. Then a row per stash, with how long ago it was put away,
-to apply, pop or drop. The header commits, pulls, pushes, stashes and reads
-the repository again. Discarding a change and dropping a stash ask first,
-because neither can be undone.
+**Git** carries the branch and how far it stands from its upstream beside
+its title, and its header commits, pulls, pushes, stashes and reads the
+repository again. Under it is a row per changed file: the path, what
+happened to it in words, and a dot that is ok for what is staged whole,
+waiting for what is not, and failed for a file both sides of a merge have
+touched. Enter opens that file's diff in the viewer, and its row stages it,
+takes it back out of the index, or throws the change away. Then a row per
+stash, with how long ago it was put away, to apply, pop or drop. Discarding
+a change and dropping a stash ask first, because neither can be undone.
 
-**Branches** is a row per local branch, the current one marked, each with
+**Branches** is a group inside the fold, folded until it is opened, with
+New on its line to make a branch from the one the head is on and switch to
+it. Its rows are a row per local branch, the current one marked, each with
 the commit it stands on. Enter switches to it, which git refuses while the
-working tree holds changes it would write over, and says so. The header
-makes a branch from the one the head is on and switches to it.
+working tree holds changes it would write over, and says so.
 
 ## The view
 

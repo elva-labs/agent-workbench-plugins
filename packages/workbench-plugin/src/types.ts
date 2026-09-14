@@ -126,6 +126,9 @@ export interface DeclaredSection {
   id: string;
   title: string;
   actions: Action[];
+  /** Whether the section starts folded where the app draws it as a group
+      of its own. */
+  folded?: boolean;
 }
 
 /** The view as the greeting declares it: the room the page asks for, the
@@ -161,6 +164,11 @@ export interface SectionLine {
   project: string;
   rows: Row[];
   actions: Action[];
+  /** A short line drawn beside the section's title. */
+  detail?: string;
+  /** Whether the section starts folded where the app draws it as a group
+      of its own. */
+  folded?: boolean;
 }
 
 /** A place to open in the viewer. */

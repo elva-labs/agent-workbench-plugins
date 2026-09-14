@@ -1,25 +1,22 @@
 /**
  * The two sections as the tree draws them: the rows, what each row's
- * actions are, and the actions on each header. A row's id says what it
- * stands for, so the action taken on it knows which file, stash or branch
- * it was given.
+ * actions are, the actions on each header, and what the Git header says
+ * beside its title. A row's id says what it stands for, so the action
+ * taken on it knows which file, stash or branch it was given.
  */
 
 import type { Action, Row } from "@elva-labs/workbench-plugin";
 import type { Branch } from "./branches.js";
 import { ago, type Stash } from "./stashes.js";
 import {
+  distance,
   name,
-  standing,
   state,
   untracked,
   words,
   type Change,
   type Status,
 } from "./status.js";
-
-/** The row the branch stands on, which every section has one of. */
-export const HEAD = "head";
 
 const FILE = "file:";
 const STASH = "stash:";
@@ -70,8 +67,6 @@ const DISCARD: Action = {
     },
   ],
 };
-
-const PUSH: Action = { id: "push", label: "Push" };
 
 const APPLY: Action = { id: "apply", label: "Apply" };
 const POP: Action = { id: "pop", label: "Pop" };
@@ -150,15 +145,19 @@ export const BRANCH_ACTIONS: Action[] = [
   },
 ];
 
-/** The Git section: the branch, then every changed file, then every
-    stash. */
+/** What the Git header says beside its title: the branch and how far it
+    stands from its upstream. */
+export function statusDetail(status: Status): string {
+  return `${name(status.head)}, ${distance(status.head)}`;
+}
+
+/** The Git section: every changed file, then every stash. */
 export function statusRows(
   status: Status,
   stashes: Stash[],
   now: number,
 ): Row[] {
   return [
-    headRow(status),
     ...status.changes.map(fileRow),
     ...stashes.map((stash) => stashRow(stash, now)),
   ];
@@ -176,18 +175,6 @@ export function branchRows(branches: Branch[]): Row[] {
     actions: [SWITCH],
     default: "switch",
   }));
-}
-
-/** The branch and where it stands. Pushing is what Enter does, and only
-    while there is something to push. */
-function headRow(status: Status): Row {
-  const ready = status.head.upstream !== null && status.head.ahead > 0;
-  return {
-    id: HEAD,
-    label: name(status.head),
-    detail: standing(status.head),
-    ...(ready ? { actions: [PUSH], default: "push" } : {}),
-  };
 }
 
 function fileRow(change: Change): Row {
