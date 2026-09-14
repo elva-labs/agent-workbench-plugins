@@ -59,7 +59,10 @@ export function escape(text: string): string {
 
 /** The page's own look: light on white, and the same page read the other
     way around where that is what the machine is set to. The frame is told
-    no theme, so both are written out here. */
+    no theme, so both are written out here. A row is one line however long
+    its parts are: the subject gives way first, then the refs and the
+    author, and the table never grows past the column it is in, so the
+    panel beside it is never drawn over. */
 const STYLE = `
 :root {
   --ink: #1b1b1f;
@@ -87,7 +90,7 @@ body {
   font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 .wrap { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; align-items: flex-start; }
-.log { flex: 3 1 460px; min-width: 0; }
+.log { flex: 3 1 460px; min-width: 0; overflow: hidden; }
 .panel { flex: 2 1 280px; min-width: 0; }
 .head {
   color: var(--dim);
@@ -99,16 +102,16 @@ body {
   text-overflow: ellipsis;
 }
 .count { color: var(--dim); opacity: 0.7; }
-.log table { border-collapse: collapse; width: 100%; }
+.log table { border-collapse: collapse; table-layout: fixed; width: 100%; max-width: 100%; }
 .log tbody { display: block; max-height: 440px; overflow: auto; }
-.log tr { display: flex; gap: 8px; width: 100%; align-items: baseline; }
+.log tr { display: flex; gap: 8px; width: 100%; min-width: 0; align-items: baseline; }
 .log tr[data-sha] { cursor: pointer; }
 .log tr[data-sha]:hover, .log tr[data-sha]:focus { background: var(--pick); outline: none; }
 .log tr.on { background: var(--pick); }
 .log td { padding: 1px 0; }
 .graph { white-space: pre; flex: 0 0 auto; color: var(--mark); }
 .sha { flex: 0 0 auto; color: var(--mark); }
-.refs { flex: 0 0 auto; }
+.refs { flex: 0 1 auto; min-width: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ref {
   border: 1px solid var(--line);
   border-radius: 3px;
@@ -116,7 +119,7 @@ body {
   color: var(--dim);
 }
 .subject { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.who { flex: 0 0 auto; color: var(--dim); }
+.who { flex: 0 1 auto; min-width: 0; max-width: 14em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); }
 .when { flex: 0 0 auto; color: var(--dim); }
 .detail { max-height: 440px; overflow: auto; }
 .detail pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
