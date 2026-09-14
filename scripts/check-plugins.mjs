@@ -5,7 +5,9 @@
  *
  * The manifest's rules are the app's: a plain identifier for a name, a path
  * that stays under the source, a runtime on the PATH, a script in the
- * plugin's own directory, and a view of "wide" or "full".
+ * plugin's own directory, and a view of "wide" or "full". A plugin whose
+ * manifest declares a build is built here when its script is missing, as
+ * the app builds one before it starts it.
  */
 
 import { spawn } from "node:child_process";
@@ -57,6 +59,24 @@ function entries(text) {
 }
 
 const plain = (name) => /^[a-z][a-z0-9_-]{0,39}$/.test(name);
+
+/** Runs a plugin's build where the plugin is, as the app does before it
+    starts one. What the build writes goes to this process's own output. */
+function builds(plugin, dir) {
+  return new Promise((done) => {
+    const [program, ...args] = plugin.build;
+    const child = spawn(program, args, {
+      cwd: dir,
+      stdio: ["ignore", "inherit", "inherit"],
+    });
+    child.on("error", (error) => {
+      done(`${plugin.name}: could not build: ${error.message}`);
+    });
+    child.on("exit", (code) => {
+      done(code === 0 ? null : `${plugin.name}: the build exited with ${code}`);
+    });
+  });
+}
 
 /** Starts the plugin, reads its greeting, tells it to stop, and waits. */
 function greets(plugin, dir) {
@@ -164,15 +184,28 @@ for (const plugin of declared) {
     problems.push(`${name}: run names no program`);
     continue;
   }
+  const build = plugin.build ?? [];
   if (
     run.length > 1 &&
     !run[1].startsWith("-") &&
     !existsSync(join(dir, run[1]))
   ) {
-    problems.push(
-      `${name}: ${run[1]} is not in its directory. Is the build run first?`,
-    );
-    continue;
+    if (build.length === 0) {
+      problems.push(
+        `${name}: ${run[1]} is not in its directory. Is the build run first?`,
+      );
+      continue;
+    }
+    const failed = await builds(plugin, dir);
+    if (failed !== null) {
+      problems.push(failed);
+      continue;
+    }
+    if (!existsSync(join(dir, run[1]))) {
+      problems.push(`${name}: the build wrote no ${run[1]}`);
+      continue;
+    }
+    say(`${name}: built, since ${run[1]} was not there yet.`);
   }
   for (const tool of plugin.tools ?? []) {
     if (!plain(tool))

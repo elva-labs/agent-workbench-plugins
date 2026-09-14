@@ -9,9 +9,10 @@ the two sides say to each other.
 ## The rules
 
 - **The manifest says what is true.** `workbench-plugins.toml` names every
-  plugin here, with its directory, the command that runs it and what it
-  declares. A plugin greets with the same tools and sections the manifest
-  lists; CI starts each one and checks that it does.
+  plugin here, with its directory, the command that runs it, the command
+  that builds it and what it declares. A plugin greets with the same tools
+  and sections the manifest lists; CI starts each one and checks that it
+  does.
 - **A plugin owns no state of the app's.** It is told about the projects,
   the sessions and the tree, and finds out everything else itself.
 - **Comments describe the present state.** What is true now, never what
@@ -49,7 +50,12 @@ CI runs exactly those, in that order, on every push and pull request.
 
 - A plugin lives in `plugins/<name>/` and is written against
   `@elva-labs/workbench-plugin` in `packages/`. It builds to `dist/` and the
-  manifest's `run` names the built file.
+  manifest's `run` names the built file. No checkout holds `dist/`, so the
+  manifest's `build` names the command that writes it: the app runs that in
+  the plugin's own directory the first time the plugin is turned on and
+  again after the source is updated, and the plugin fails with the build's
+  last line when it does not go through. Fetching what the build needs is
+  the build script's own business.
 - New behaviour in the package gets a test that drives the loop over
   in-memory streams rather than mocking its parts.
 - A plugin's own tests fake what it shells out to, on PATH, and assert the

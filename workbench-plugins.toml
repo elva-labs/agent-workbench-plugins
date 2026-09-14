@@ -1,4 +1,6 @@
-# The plugins in this source, as the app reads them.
+# The plugins in this source, as the app reads them. Each is built to its
+# own dist/, which no checkout holds, so each names the command that builds
+# it and the app runs that before the process.
 
 [[plugin]]
 name = "todos"
@@ -6,6 +8,7 @@ path = "plugins/todos"
 description = "The TODOs in the code, and notes to self, per project."
 version = "0.1.0"
 run = ["node", "dist/main.js"]
+build = ["npm", "run", "build"]
 tools = ["list", "add", "finish"]
 sections = ["Todos", "Notes"]
 
@@ -15,6 +18,7 @@ path = "plugins/git"
 description = "The branch, what changed, the stashes and a graph of the log."
 version = "0.1.0"
 run = ["node", "dist/main.js"]
+build = ["npm", "run", "build"]
 tools = ["status", "commit", "log"]
 sections = ["Git", "Branches"]
 view = "full"
